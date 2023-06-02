@@ -17,7 +17,7 @@ module.exports.addMessage = async (req, res, next) => {
     }
 };
 
-module.exports.getAllMessage = async (req, res, next) => {
+module.exports.getAllMessages = async (req, res, next) => {
     try {
         const { from, to } = req.body;
         const messages = await Message.find({
@@ -31,7 +31,7 @@ module.exports.getAllMessage = async (req, res, next) => {
                 message: msg.message.text,
             }
         });
-        res.json(projectMessages);
+        return res.json(projectMessages);
     } catch (err) {
         next(err);
     }

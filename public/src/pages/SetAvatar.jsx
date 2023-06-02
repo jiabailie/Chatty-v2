@@ -6,7 +6,7 @@ import loader from "../assets/loader.gif";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import { setAvatarRoute } from "../utils/ApiRoutes";
+import { graphqlHost } from "../utils/ApiRoutes";
 
 export default function SetAvatar() {
   const api = `https://api.multiavatar.com/20180519`;
@@ -34,14 +34,32 @@ export default function SetAvatar() {
       toast.error("Please select an avatar", toastOptions);
     } else {
       const user = await JSON.parse(localStorage.getItem("chatty-user"));
-      const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
-        image: avatars[selectedAvatar],
+      const setAvatarQuery = `
+      mutation {
+        setAvatar(request: {id: "${user._id}",
+        image: "${avatars[selectedAvatar]}"}) {
+          status, message, user {
+            _id
+            username
+            email
+            isAvatarImageSet
+            avatarImage
+          }
+        }
+      }
+      `;
+      const { data } = await axios({
+        url: graphqlHost,
+        method: "POST",
+        data: {
+          query: setAvatarQuery
+        }
       });
 
-      if (data.isSet) {
+      if (data.data.setAvatar.user.isAvatarImageSet) {
         user.isAvatarImageSet = true;
-        user.avatarImage = data.image;
-        localStorage.setItem("chatty-user", JSON.stringify(user));
+        user.avatarImage = data.data.setAvatar.image;
+        localStorage.setItem("chatty-user", JSON.stringify(data.data.setAvatar.user));
         navigate("/");
       } else {
         toast.error("Error setting avatar. Please try again", toastOptions);

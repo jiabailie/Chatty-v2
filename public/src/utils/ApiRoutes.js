@@ -5,3 +5,5 @@ export const setAvatarRoute = `${host}/api/auth/setAvatar`;
 export const allUsersRoute = `${host}/api/auth/allUsers`;
 export const sendMessageRoute = `${host}/api/message/addmsg`;
 export const getAllMessagesRoute = `${host}/api/message/getmsg`;
+
+export const graphqlHost = "http://localhost:50000/graphql";

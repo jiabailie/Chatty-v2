@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Logout from "./Logout";
 import ChatInput from "./ChatInput";
 import axios from "axios";
-import { getAllMessagesRoute, sendMessageRoute } from "../utils/ApiRoutes";
+import { graphqlHost } from "../utils/ApiRoutes";
 import { v4 as uuidv4 } from "uuid";
 
 export default function ChatContainer({ currentChat, socket }) {
@@ -14,21 +14,55 @@ export default function ChatContainer({ currentChat, socket }) {
   useEffect(() => {
     (async () => {
       if (currentChat) {
-        const data = await JSON.parse(localStorage.getItem("chatty-user"));
-        const response = await axios.post(getAllMessagesRoute, {
-          from: data._id,
-          to: currentChat._id,
+        const currentUser = await JSON.parse(localStorage.getItem("chatty-user"));
+        const getAllMessageQuery = `
+        {
+          getAllMessages(
+            request: {
+              from: "${currentUser._id}",
+              to: "${currentChat._id}", 
+            }) {
+            status
+            message
+            messages {
+              fromSelf
+              message
+              quote
+            }
+          }
+        }
+        `;
+        const { data } = await axios({
+          url: graphqlHost,
+          method: "POST",
+          data: {
+            query: getAllMessageQuery
+          }
         });
-        setMessages(response.data);
+        setMessages(data.data.getAllMessages.messages);
       }
     })();
   }, [currentChat]);
   const handleSendMessage = async (message) => {
     const data = await JSON.parse(localStorage.getItem("chatty-user"));
-    await axios.post(sendMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-      message: message,
+    const addMessageQuery = `
+    mutation {
+      addMessage(request: {
+      from: "${data._id}",
+      to: "${currentChat._id}",
+      message: "${message}"
+      }) {
+        status
+        message
+      }
+    }
+    `;
+    await axios({
+      url: graphqlHost,
+      method: "POST",
+      data: {
+        query: addMessageQuery
+      }
     });
     socket.current.emit("send-msg", {
       to: currentChat._id,

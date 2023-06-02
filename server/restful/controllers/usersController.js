@@ -16,7 +16,7 @@ module.exports.register = async (req, res, next) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
-            email, username, password: hashedPassword,
+            email, username, password: hashedPassword, isAvatarImageSet: false,
         });
         delete user.password;
         return res.json({ status: true, user });

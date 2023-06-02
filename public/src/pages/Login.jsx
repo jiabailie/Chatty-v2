@@ -5,7 +5,7 @@ import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { loginRoute } from "../utils/ApiRoutes";
+import { graphqlHost } from "../utils/ApiRoutes";
 
 function Login() {
     const navigate = useNavigate();
@@ -30,15 +30,34 @@ function Login() {
         event.preventDefault();
         if (handleValidation()) {
             const { password, username } = values;
-            const { data } = await axios.post(loginRoute, {
-                username, password,
+            const loginQuery = `
+            {
+              login(request: {username: "${username}", password: "${password}"}) {
+                status
+                message
+                user {
+                  _id
+                  username
+                  email
+                  isAvatarImageSet
+                  avatarImage
+                }
+              }
+            }
+            `;
+            const { data } = await axios({
+              url: graphqlHost,
+              method: "POST",
+              data: {
+                query: loginQuery
+              }
             });
 
-            if (data.status === false) {
+            if (data.data.login.status === false) {
                 toast.error(data.msg, toastOptions);
             }
-            if (data.status === true) {
-                localStorage.setItem("chatty-user", JSON.stringify(data.user));
+            if (data.data.login.status === true) {
+                localStorage.setItem("chatty-user", JSON.stringify(data.data.login.user));
                 navigate("/");
             }
         }

@@ -5,7 +5,7 @@ import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { registerRoute } from "../utils/ApiRoutes";
+import { graphqlHost } from "../utils/ApiRoutes";
 
 function Register() {
   const navigate = useNavigate();
@@ -32,15 +32,35 @@ function Register() {
     event.preventDefault();
     if (handleValidation()) {
       const { password, username, email } = values;
-      const { data } = await axios.post(registerRoute, {
-        username, email, password,
+      const registerQuery = `
+      mutation {
+        register(request: {
+          username: "${username}",
+          email: "${email}",
+          password: "${password}"
+        }) {
+          status, message, user {
+            _id
+            username
+            email
+            isAvatarImageSet
+            avatarImage
+          }
+        }
+      }`;
+
+      const { data } = await axios({
+        url: graphqlHost,
+        method: "POST",
+        data: {
+          query: registerQuery
+        }
       });
 
-      if (data.status === false) {
-        toast.error(data.msg, toastOptions);
-      }
-      if (data.status === true) {
-        localStorage.setItem('chatty-user', JSON.stringify(data.user));
+      if (data.data.register.status === false) {
+        toast.error(data.data.register.message, toastOptions);
+      } else {
+        localStorage.setItem('chatty-user', JSON.stringify(data.data.register.user));
         navigate("/");
       }
     }

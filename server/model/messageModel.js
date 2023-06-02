@@ -7,17 +7,16 @@ const messageSchema = new mongoose.Schema(
                 type: String,
                 required: true,
             },
+            quote: {
+                type: String,
+                require: false,
+            }
         },
         users: Array,
         sender: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-        },
-        quote: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Message",
-            required: false,            
         },
     },
     {

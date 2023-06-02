@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { allUsersRoute, host } from "../utils/ApiRoutes";
+import { graphqlHost, host } from "../utils/ApiRoutes";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 import ChatContainer from "../components/ChatContainer";
@@ -35,8 +35,27 @@ function Chat() {
         (async () => {
             if (currentUser) {
                 if (currentUser.isAvatarImageSet) {
-                    const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-                    setContacts(data.data);
+                    const getAllUsersQuery = `
+                    {
+                        getAllUsers(request: {id: "${currentUser._id}"}) {
+                          status, message, users {
+                            _id
+                            username
+                            email
+                            isAvatarImageSet
+                            avatarImage
+                          }
+                        }
+                    }
+                    `;
+                    const { data } = await axios({
+                        url: graphqlHost,
+                        method: "POST",
+                        data: {
+                            query: getAllUsersQuery
+                        }
+                    });
+                    setContacts(data.data.getAllUsers.users);
                 } else {
                     navigate('/setAvatar');
                 }
