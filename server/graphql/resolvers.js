@@ -2,7 +2,7 @@ const User = require("../model/userModel");
 const Message = require("../model/messageModel");
 const bcrypt = require("bcrypt");
 
-class GetAllUserResponse {
+class GetUsersResponse {
     constructor(status, message, users) {
         this.status = status;
         this.message = message;
@@ -65,9 +65,24 @@ module.exports = {
             const users = await User.find({ _id: { $ne: request.id } }).select([
                 "_id", "username", "email", "isAvatarImageSet", "avatarImage",
             ]);
-            return new GetAllUserResponse(true, "SUCCESS", users);
+            return new GetUsersResponse(true, "SUCCESS", users);
         } catch (err) {
-            return new GetAllUserResponse(false, err.message, null);
+            return new GetUsersResponse(false, err.message, null);
+        }
+    },
+    getMentionUsers: async ({ request }) => {
+        try {
+            const users = await User.find({
+                $and: [
+                    { _id: { $ne: request.id } },
+                    { username: { $regex: "^" + request.starts } }
+                ]
+            }).select([
+                "_id", "username", "email", "isAvatarImageSet", "avatarImage",
+            ]);
+            return new GetUsersResponse(true, "SUCCESS", users);
+        } catch (err) {
+            return new GetUsersResponse(false, err.message, null);
         }
     },
     register: async ({ request }) => {

@@ -28,11 +28,15 @@ type UserResponse {
 input GetAllUsersRequest {
   id: String!
 }
+input GetMentionUsersRequest {
+  id: String!
+  starts: String!
+}
 input LoginRequest {
   username: String!
   password: String!
 }
-type GetAllUserResponse {
+type GetUsersResponse {
   status: Boolean!
   message: String!
   users: [User]
@@ -75,7 +79,8 @@ type GetQuoteMessageResponse {
 }
 type Query {
   login(request: LoginRequest!): UserResponse
-  getAllUsers(request: GetAllUsersRequest!): GetAllUserResponse
+  getAllUsers(request: GetAllUsersRequest!): GetUsersResponse
+  getMentionUsers(request: GetMentionUsersRequest!): GetUsersResponse
   getAllMessages(request: GetAllMessageRequest!): GetAllMessageResponse
   getQuoteMessage(request: GetQuoteMessageRequest!): GetQuoteMessageResponse
 }
