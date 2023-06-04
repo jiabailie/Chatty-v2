@@ -15,8 +15,7 @@ export default function ChatContainer({ currentChat, socket }) {
     (async () => {
       if (currentChat) {
         const currentUser = await JSON.parse(localStorage.getItem("chatty-user"));
-        const getAllMessageQuery = `
-        {
+        const getAllMessageQuery = `{
           getAllMessages(
             request: {
               from: "${currentUser._id}",
@@ -30,8 +29,7 @@ export default function ChatContainer({ currentChat, socket }) {
               quote
             }
           }
-        }
-        `;
+        }`;
         const { data } = await axios({
           url: graphqlHost,
           method: "POST",

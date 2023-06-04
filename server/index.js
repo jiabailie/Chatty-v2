@@ -3,17 +3,15 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const userRoutes = require("./restful/routes/userRoutes");
 const messageRoutes = require("./restful/routes/messageRoutes");
-
+const schema = require("./graphql/schemas");
+const resolvers = require("./graphql/resolvers");
+const socket = require("socket.io");
 const graphqlHTTP = require("express-graphql").graphqlHTTP;
 
 const app = express();
-const socket = require("socket.io");
 require("dotenv").config();
 
 // graphql start
-const schema = require("./graphql/schemas");
-const resolvers = require("./graphql/resolvers");
-
 app.use("/graphql", cors(), graphqlHTTP({
     schema: schema,
     rootValue: resolvers,
